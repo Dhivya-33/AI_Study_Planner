@@ -1,63 +1,65 @@
 import streamlit as st
-from agents.planner_agent import create_study_plan
-from agents.tracker_agent import analyze_progress
-from agents.revision_agent import generate_revision_plan
 
-st.set_page_config(page_title="AI Study Planner", layout="wide")
+st.set_page_config(page_title="AI Study Copilot", layout="wide")
 
-st.title("📚 AI Study Planner & Tracker")
+# ---------- STYLE ----------
+st.markdown("""
+<style>
+body {background-color: #0f172a;}
+.card {
+    background: #1e293b;
+    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    color: white;
+}
+.title {
+    font-size: 28px;
+    font-weight: bold;
+}
+</style>
+""", unsafe_allow_html=True)
 
-# --- SIDEBAR INPUT ---
-st.sidebar.header("Enter Details")
+# ---------- SIDEBAR ----------
+st.sidebar.title("📘 Study Setup")
 
-subject = st.sidebar.text_input("Subject")
-days = st.sidebar.number_input("Number of Days", min_value=1, step=1)
+subject = st.sidebar.text_input("Subject", "DBMS")
+days = st.sidebar.number_input("Days", 1)
+completed = st.sidebar.number_input("Completed Topics", 0)
+total = st.sidebar.number_input("Total Topics", 5)
 
-completed = st.sidebar.number_input("Topics Completed", min_value=0, step=1)
-total = st.sidebar.number_input("Total Topics", min_value=1, step=1)
+progress = completed / total if total else 0
+st.sidebar.progress(progress)
+st.sidebar.write(f"Progress: {int(progress*100)}%")
 
-weak_topics = st.sidebar.text_input("Weak Topics (comma separated)")
+# ---------- HEADER ----------
+st.markdown("<div class='title'>🚀 AI Study Copilot</div>", unsafe_allow_html=True)
+st.write("Plan smarter. Study better.")
 
-# --- TABS ---
-tab1, tab2, tab3 = st.tabs(["📚 Planner", "📊 Tracker", "🔁 Revision"])
+# ---------- GENERATE ----------
+if st.button("Generate Study Plan"):
 
-# ------------------ TAB 1: STUDY PLAN ------------------
-with tab1:
-    st.header("📚 Study Planner")
+    st.subheader("📅 Today's Plan")
 
-    if st.button("Generate Study Plan"):
-        if subject and days:
-            with st.spinner("Generating Study Plan..."):
-                plan = create_study_plan(subject, days)
-                st.write(plan)
-        else:
-            st.warning("Enter subject and days")
+    def card(time, title, desc):
+        st.markdown(f"""
+        <div class="card">
+            <h4>⏰ {time}</h4>
+            <b>{title}</b>
+            <p>{desc}</p>
+        </div>
+        """, unsafe_allow_html=True)
 
-# ------------------ TAB 2: TRACKER ------------------
-with tab2:
-    st.header("📊 Progress Tracker")
+    card("9:00 - 9:30", "Introduction", "Overview of DBMS concepts")
+    card("9:30 - 12:00", "Deep Study", "ER models, Keys, Normalization")
+    card("1:00 - 2:00", "Practice", "Solve SQL queries")
+    card("2:30 - 4:00", "Revision", "Revise weak topics")
+    card("4:00 - 5:00", "Final Review", "Mock test")
 
-    if st.button("Analyze Progress"):
-        if total > 0:
-            with st.spinner("Analyzing Progress..."):
-                progress, analysis = analyze_progress(subject, completed, total, weak_topics)
+# ---------- CHAT ----------
+st.subheader("💬 Ask AI")
 
-                st.progress(int(progress))
-                st.write(f"**Progress:** {progress:.2f}%")
+user_input = st.text_input("Ask something...")
 
-                st.subheader("🤖 AI Feedback")
-                st.write(analysis)
-        else:
-            st.warning("Enter valid topic values")
-
-# ------------------ TAB 3: REVISION ------------------
-with tab3:
-    st.header("🔁 Revision Planner")
-
-    if st.button("Generate Revision Plan"):
-        if weak_topics:
-            with st.spinner("Generating Revision Plan..."):
-                revision = generate_revision_plan(subject, weak_topics)
-                st.write(revision)
-        else:
-            st.warning("Enter weak topics")
+if user_input:
+    st.write("🤖 AI:", "This is where Groq response will come")
